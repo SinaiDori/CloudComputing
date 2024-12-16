@@ -1,6 +1,4 @@
-import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from Entities.Stock import Stock
 from Entities.StocksRealValue import fetch_stock_real_price
 
