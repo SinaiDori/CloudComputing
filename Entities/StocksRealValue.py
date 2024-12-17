@@ -1,5 +1,5 @@
 import requests
-from flask import abort
+from Core.exceptions import StocksRealValueError
 
 API_KEY = "MybMJ/yhrKNKH7YJVCSfZg==pW9iG0vqEIjkRpnn"
 API_URL = "https://api.api-ninjas.com/v1/stockprice"
@@ -11,4 +11,4 @@ def fetch_stock_real_price(symbol):
     if response.status_code == 200:
         return response.json().get("price")
     else:
-        abort(500, description="API response code " + str(response.status_code))
+        raise StocksRealValueError(str(response.status_code))

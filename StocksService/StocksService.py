@@ -307,6 +307,7 @@ from flask import Flask, request, jsonify, abort
 import requests
 from Entities.Stock import Stock  # Importing the Stock class
 from Entities.StocksRealValue import fetch_stock_real_price
+from Core.exceptions import StocksRealValueError
 
 app = Flask(__name__)
 
@@ -421,6 +422,8 @@ def get_stock_value(stock_id):
             "ticker": ticker_price,
             "stock value": stock_value
         }), 200
+    except StocksRealValueError as e:
+        abort(500, description=f"API response code {e}")
     except requests.exceptions.RequestException as e:
         abort(500, description=f"Error communicating with MongoDBService: {e}")
     except KeyError as e:
