@@ -1,44 +1,43 @@
-version: '3.8'
-
-x-general-env: &general-env
-  MONGO_DB_CONTAINER_PORT: 27017
+x-mongo-container-port-env: &mongo-container-port-env
+  MONGO_DB_CONTAINER_PORT: "27017"
 
 services:
   stocks1:
-    build: ./StocksService
+    build:
+      context: .
+      dockerfile: ./StocksService/Dockerfile
     environment:
-      <<: *general-env
-      FLASK_APP: StocksService.py
-      STOCKS_SERVICE_PORT: 5001
+      <<: *mongo-container-port-env
+      COLLECTION_NAME: "stocks1"
     ports:
-      - 5001:8000
+      - "5001:8000"
     expose:
       # expose this container to other containers
-      - 8000
+      - "8000"
     depends_on:
       - mongodb
 
   stocks2:
-    build: ./StocksService
+    build:
+      context: .
+      dockerfile: ./StocksService/Dockerfile
     environment:
-      <<: *general-env
-      FLASK_APP: StocksService.py
-      STOCKS_SERVICE_PORT: 5002
+      <<: *mongo-container-port-env
+      COLLECTION_NAME: "stocks2"
     ports:
-      - 5002:8000
+      - "5002:8000"
     expose:
       # expose this container to other containers
-      - 8000
+      - "8000"
     depends_on:
       - mongodb
 
   capital-gains:
-    build: ./CapitalGainsService
-    environment:
-      FLASK_APP: CapitalGainsService.py
-      CAPITAL_GAIN_SERVICE_PORT: 5003
+    build:
+      context: .
+      dockerfile: ./CapitalGainsService/Dockerfile
     ports:
-      - 5003:8080
+      - "5003:8080"
     depends_on:
       - stocks1
       - stocks2
@@ -50,17 +49,17 @@ services:
     volumes:
       - mongo-data:/data/db
 
-  MongoDBService:
+  mongodb-service:
     build: ./MongoDBService
     environment:
-      <<: *general-env
-      FLASK_APP: MongoDBService.py
-      MONGO_URI: mongodb://mongodb:27017
-    ports:
-      - 27017
+      <<: *mongo-container-port-env
+      # FLASK_APP: MongoDBService
+      MONGO_URI: "mongodb://mongodb:27017"
+    # ports:
+    #   - "27017"
     expose:
       # expose this container to other containers
-      - 27017
+      - "27017"
     depends_on:
       - mongodb
 

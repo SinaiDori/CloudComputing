@@ -2,14 +2,14 @@ FROM python:alpine3.17
 
 WORKDIR /app
 
-COPY CapitalGainsService.py /app
-COPY requirements.txt /app
+COPY ./Entities /app/Entities
+COPY ./Core /app/Core
+
+COPY ./CapitalGainsService/CapitalGainsService.py /app/CapitalGainsService.py
+COPY ./CapitalGainsService/requirements.txt /app/requirements.txt
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 5003
-
 ENV FLASK_APP=CapitalGainsService.py
-ENV FLASK_RUN_PORT=5003
 
-CMD ["flask", "run", "--host=0.0.0.0"]
+CMD ["python", "CapitalGainsService.py"]

@@ -12,4 +12,4 @@ EXPOSE 27017
 ENV FLASK_APP=MongoDBService.py
 ENV MONGO_DB_CONTAINER_PORT=27017
 
-CMD ["flask", "run", "--host=0.0.0.0"]
+CMD ["python", "MongoDBService.py"]

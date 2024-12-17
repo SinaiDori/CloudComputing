@@ -8,8 +8,8 @@ app = Flask(__name__)
 
 def fetch_stocks(query_params: dict = None) -> dict:
     services = {
-        "stocks1": "http://Stocks1:8000/stocks",
-        "stocks2": "http://Stocks2:8000/stocks"
+        "stocks1": "http://stocks1:8000/stocks",
+        "stocks2": "http://stocks2:8000/stocks"
     }
 
     stocks = {}
@@ -64,4 +64,4 @@ def internal_server_error(error):
     return jsonify({"server error": description}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.getenv('CAPITAL_GAIN_SERVICE_PORT', 5003)))
+    app.run(host='0.0.0.0', port=8080)
