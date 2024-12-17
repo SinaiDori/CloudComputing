@@ -311,10 +311,10 @@ from Entities.StocksRealValue import fetch_stock_real_price
 app = Flask(__name__)
 
 # MongoDB Service URL
-MONGO_DB_SERVICE_URL = "http://localhost:5002/stocks"
+MONGO_DB_SERVICE_URL = "http://MongoDB:27017"
 
 # Collection name from the environment variable
-COLLECTION_NAME = os.getenv("COLLECTION_NAME", "default_collection")
+COLLECTION_NAME = os.getenv("COLLECTION_NAME", "stocks1")
 
 
 @app.route('/stocks', methods=['POST', 'GET'])
@@ -480,4 +480,6 @@ def internal_server_error(error):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.getenv('FLASK_RUN_PORT', 5001)))
+    stocks_port = 5001 if COLLECTION_NAME == "stocks1" else 5002
+    app.run(host='0.0.0.0', port=int(
+        os.getenv('STOCKS_SERVICE_PORT', stocks_port)))
