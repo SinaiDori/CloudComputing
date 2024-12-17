@@ -78,12 +78,17 @@ app = Flask(__name__)
 # MongoDB Setup
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
 client = MongoClient(MONGO_URI)
-db = client["stock_management"]
+stocks1_collection = client["stocks1"]
+stocks2_collection = client["stocks2"]
+stocks_collections = {
+    "stocks1": stocks1_collection,
+    "stocks2": stocks2_collection
+}
 
 
-@app.route('/stocks/<collection>', methods=['POST', 'GET'])
+@app.route('/<collection>', methods=['POST', 'GET'])
 def manage_stocks(collection):
-    stocks_collection = db[collection]
+    stocks_collection = stocks_collections.get(collection)
 
     if request.method == 'POST':
         data = request.json
@@ -109,9 +114,9 @@ def manage_stocks(collection):
             abort(500, description=str(e))
 
 
-@app.route('/stocks/<collection>/<stock_id>', methods=['GET', 'PUT', 'DELETE'])
+@app.route('/<collection>/<stock_id>', methods=['GET', 'PUT', 'DELETE'])
 def manage_stock(collection, stock_id):
-    stocks_collection = db[collection]
+    stocks_collection = stocks_collections.get(collection)
 
     if request.method == 'GET':
         stock = stocks_collection.find_one({"_id": ObjectId(stock_id)})
@@ -159,4 +164,5 @@ def fetch_db_structure():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5002)
+    app.run(host="0.0.0.0", port=int(
+        os.getenv("MONGO_DB_SERVICE_PORT", 27017)))
