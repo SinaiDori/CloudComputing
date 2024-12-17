@@ -8,8 +8,8 @@ app = Flask(__name__)
 
 def fetch_stocks(query_params: dict = None) -> dict:
     services = {
-        "stocks1": "http://Stocks1:5001/stocks",
-        "stocks2": "http://Stocks2:5002/stocks"
+        "stocks1": "http://Stocks1:8000/stocks",
+        "stocks2": "http://Stocks2:8000/stocks"
     }
 
     stocks = {}

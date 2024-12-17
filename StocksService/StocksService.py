@@ -311,8 +311,10 @@ from Core.exceptions import StocksRealValueError
 
 app = Flask(__name__)
 
+MONGO_DB_CONTAINER_PORT = os.getenv("MONGO_DB_CONTAINER_PORT", 27017)
+
 # MongoDB Service URL
-MONGO_DB_SERVICE_URL = "http://MongoDB:27017"
+MONGO_DB_SERVICE_URL = f"http://MongoDBService:{MONGO_DB_CONTAINER_PORT}"
 
 # Collection name from the environment variable
 COLLECTION_NAME = os.getenv("COLLECTION_NAME", "stocks1")

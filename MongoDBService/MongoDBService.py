@@ -76,7 +76,7 @@ from bson.objectid import ObjectId
 app = Flask(__name__)
 
 # MongoDB Setup
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongodb:27017")
 client = MongoClient(MONGO_URI)
 stocks1_collection = client["stocks1"]
 stocks2_collection = client["stocks2"]
@@ -165,4 +165,4 @@ def fetch_db_structure():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(
-        os.getenv("MONGO_DB_SERVICE_PORT", 27017)))
+        os.getenv("MONGO_DB_CONTAINER_PORT", 27017)))
