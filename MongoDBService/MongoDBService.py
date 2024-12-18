@@ -105,6 +105,7 @@ from typing import Dict, List, Any, Optional
 # MongoDB Setup
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongodb:27017")
 client = MongoClient(MONGO_URI)
+db = client["stocks"]
 
 
 def get_stocks(collection: str, query_params: Dict[str, Any] = None) -> List[Dict[str, Any]]:
@@ -119,7 +120,7 @@ def get_stocks(collection: str, query_params: Dict[str, Any] = None) -> List[Dic
         List of stock dictionaries
     """
     try:
-        stocks = list(client[collection].find(query_params or {}))
+        stocks = list(db[collection].find(query_params or {}))
         for stock in stocks:
             stock["_id"] = str(stock["_id"])  # Convert ObjectId to string
         return stocks
@@ -142,7 +143,7 @@ def create_stock(collection: str, data: Dict[str, Any]) -> str:
         raise ValueError("Missing stock data")
 
     try:
-        result = client[collection].insert_one(data)
+        result = db[collection].insert_one(data)
         return str(result.inserted_id)
     except Exception as e:
         raise RuntimeError(f"Error creating stock: {str(e)}")
@@ -160,7 +161,7 @@ def get_stock(collection: str, stock_id: str) -> Dict[str, Any]:
         Stock document as a dictionary
     """
     try:
-        stock = client[collection].find_one({"_id": ObjectId(stock_id)})
+        stock = db[collection].find_one({"_id": ObjectId(stock_id)})
         if not stock:
             raise ValueError("Stock not found")
         stock["_id"] = str(stock["_id"])
@@ -185,7 +186,7 @@ def update_stock(collection: str, stock_id: str, data: Dict[str, Any]) -> bool:
         raise ValueError("Missing update data")
 
     try:
-        result = client[collection].update_one(
+        result = db[collection].update_one(
             {"_id": ObjectId(stock_id)}, {"$set": data})
         return result.matched_count > 0
     except Exception as e:
@@ -204,32 +205,32 @@ def delete_stock(collection: str, stock_id: str) -> bool:
         Boolean indicating success of deletion
     """
     try:
-        result = client[collection].delete_one({"_id": ObjectId(stock_id)})
+        result = db[collection].delete_one({"_id": ObjectId(stock_id)})
         return result.deleted_count > 0
     except Exception as e:
         raise RuntimeError(f"Error deleting stock: {str(e)}")
 
 
-def get_db_structure() -> Dict[str, Any]:
-    """
-    Retrieve the entire database structure.
+# def get_db_structure() -> Dict[str, Any]:
+#     """
+#     Retrieve the entire database structure.
 
-    Returns:
-        Dictionary representing database and collection structure
-    """
-    try:
-        structure = {}
-        databases = client.list_database_names()
-        for database_name in databases:
-            database = client[database_name]
-            collections = database.list_collection_names()
-            structure[database_name] = {}
-            for collection_name in collections:
-                collection = database[collection_name]
-                structure[database_name][collection_name] = list(
-                    collection.find())
-                for doc in structure[database_name][collection_name]:
-                    doc["_id"] = str(doc["_id"])  # Convert ObjectId to string
-        return structure
-    except Exception as e:
-        raise RuntimeError(f"Error retrieving database structure: {str(e)}")
+#     Returns:
+#         Dictionary representing database and collection structure
+#     """
+#     try:
+#         structure = {}
+#         databases = client.list_database_names()
+#         for database_name in databases:
+#             database = client[database_name]
+#             collections = database.list_collection_names()
+#             structure[database_name] = {}
+#             for collection_name in collections:
+#                 collection = database[collection_name]
+#                 structure[database_name][collection_name] = list(
+#                     collection.find())
+#                 for doc in structure[database_name][collection_name]:
+#                     doc["_id"] = str(doc["_id"])  # Convert ObjectId to string
+#         return structure
+#     except Exception as e:
+#         raise RuntimeError(f"Error retrieving database structure: {str(e)}")

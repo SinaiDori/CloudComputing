@@ -1,12 +1,12 @@
 import os
 from Entities.StocksRealValue import fetch_stock_real_price
-from flask import Flask, jsonify, abort
+from flask import Flask, jsonify, abort, request
 import requests
 from Core.exceptions import StocksRealValueError
 
 app = Flask(__name__)
 
-def fetch_stocks(query_params: dict = None) -> dict:
+def fetch_stocks(query_params: dict = {}) -> dict:
     services = {
         "stocks1": "http://stocks1:8000/stocks",
         "stocks2": "http://stocks2:8000/stocks"
@@ -43,14 +43,14 @@ def fetch_stocks(query_params: dict = None) -> dict:
 def capital_gains():
     
     total_capital_gains = 0
-    if not stocks:
-        stocks = fetch_stocks()
+    query_params = request.args.to_dict()
+    stocks = fetch_stocks(query_params)
 
     for stock in stocks.values():
         try:
-            current_price = fetch_stock_real_price(stock.symbol)
-            current_value = stock.shares * current_price
-            capital_gain = current_value - stock.purchase_price
+            current_price = fetch_stock_real_price(stock["symbol"])
+            current_value = stock["shares"] * current_price
+            capital_gain = current_value - stock["purchase price"]
             total_capital_gains += capital_gain
         except StocksRealValueError as e:
             abort(500, description="API response code " + e)
