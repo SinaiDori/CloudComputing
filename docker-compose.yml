@@ -1,5 +1,5 @@
-x-mongo-container-port-env: &mongo-container-port-env
-  MONGO_DB_CONTAINER_PORT: "27017"
+x-mongo-uri: &mongo-uri
+  MONGO_URI: "mongodb://mongodb:27017"
 
 services:
   stocks1:
@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: ./StocksService/Dockerfile
     environment:
-      <<: *mongo-container-port-env
+      <<: *mongo-uri
       COLLECTION_NAME: "stocks1"
     ports:
       - "5001:8000"
@@ -22,7 +22,7 @@ services:
       context: .
       dockerfile: ./StocksService/Dockerfile
     environment:
-      <<: *mongo-container-port-env
+      <<: *mongo-uri
       COLLECTION_NAME: "stocks2"
     ports:
       - "5002:8000"
@@ -46,22 +46,11 @@ services:
     image: mongo:latest
     ports:
       - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-
-  mongodb-service:
-    build: ./MongoDBService
-    environment:
-      <<: *mongo-container-port-env
-      # FLASK_APP: MongoDBService
-      MONGO_URI: "mongodb://mongodb:27017"
-    # ports:
-    #   - "27017"
     expose:
       # expose this container to other containers
       - "27017"
-    depends_on:
-      - mongodb
+    volumes:
+      - mongo-data:/data/db
 
   nginx:
     build: ./NGINX
