@@ -149,7 +149,7 @@ def create_stock(collection: str, data: Dict[str, Any]) -> str:
         raise RuntimeError(f"Error creating stock: {str(e)}")
 
 
-def get_stock(collection: str, stock_id: str) -> Dict[str, Any]:
+def get_stock(collection: str, stock_id: str) -> Optional[Dict[str, Any]]:
     """
     Retrieve a specific stock by its ID.
 
@@ -162,6 +162,27 @@ def get_stock(collection: str, stock_id: str) -> Dict[str, Any]:
     """
     try:
         stock = db[collection].find_one({"_id": ObjectId(stock_id)})
+        if not stock:
+            raise ValueError("Stock not found")
+        stock["_id"] = str(stock["_id"])
+        return stock
+    except Exception as e:
+        raise RuntimeError(f"Error retrieving stock: {str(e)}")
+
+
+def get_stock_by_symbol(collection: str, symbol: str) -> Optional[Dict[str, Any]]:
+    """
+    Retrieve a specific stock by its symbol.
+
+    Args:
+        collection (str): Name of the collection
+        symbol (str): Symbol of the stock to retrieve
+
+    Returns:
+        Stock document as a dictionary or None if not found
+    """
+    try:
+        stock = db[collection].find_one({"symbol": symbol})
         if not stock:
             raise ValueError("Stock not found")
         stock["_id"] = str(stock["_id"])

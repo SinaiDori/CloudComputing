@@ -229,7 +229,7 @@ def manage_stocks():
 
             return jsonify({"status": "success", "id": inserted_id}), 201
         except ValueError as e:
-            abort(400, description=f"Invalid data: {e}")
+            abort(400)
         except Exception as e:
             abort(500, description=f"Error creating stock: {e}")
 
@@ -262,7 +262,8 @@ def manage_stock(stock_id):
         data = request.json
         try:
             # Validate and prepare the updated stock data
-            prepared_stock_data = Stock.prepare_stock_data(data, is_new=False)
+            prepared_stock_data = Stock.prepare_stock_data(
+                data, is_new=False, id_when_not_new=stock_id)
 
             # Update stock in MongoDB
             success = mongo_service.update_stock(
@@ -272,7 +273,7 @@ def manage_stock(stock_id):
 
             return jsonify({"status": "success"}), 200
         except ValueError as e:
-            abort(400, description=f"Invalid data: {e}")
+            abort(400)
         except Exception as e:
             abort(500, description=f"Error updating stock: {e}")
 

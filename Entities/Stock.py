@@ -1,6 +1,13 @@
+import MongoDBService.MongoDBService as mongo_service
+import os
+
+# Collection name from the environment variable
+COLLECTION_NAME = os.getenv("COLLECTION_NAME", "stocks1")
+
+
 class Stock:
     @classmethod
-    def validate_stock_fields(cls, data: dict, is_new: bool = True):
+    def validate_stock_fields(cls, data: dict, is_new: bool = True, id_when_not_new: str = None):
         """
         Validate stock data fields with different requirements for new and existing stocks.
 
@@ -15,6 +22,22 @@ class Stock:
         # Validate required fields are present
         if not all(field in data for field in required_fields):
             raise ValueError("Missing required fields")
+
+        # Validate symbol not already in stocks
+        # if is_new, we need to go through all stocks to check for duplicates
+        # if not is_new, we need to make sure the id is the same as the one we're updating
+        if is_new:
+            if mongo_service.get_stock_by_symbol(COLLECTION_NAME, data["symbol"]):
+                raise ValueError("Stock with symbol already exists")
+        else:
+            stock = mongo_service.get_stock(COLLECTION_NAME, id_when_not_new)
+            # if we reach this point, the stock exists
+            if id_when_not_new != data["id"]:
+                raise ValueError("Cannot change stock ID")
+            # if we reach this point, the stock ID is the same
+            if stock["symbol"] != data["symbol"]:
+                if mongo_service.get_stock_by_symbol(COLLECTION_NAME, data["symbol"]):
+                    raise ValueError("Stock with symbol already exists")
 
         # Validate purchase price
         try:
@@ -38,7 +61,7 @@ class Stock:
             raise ValueError(f"Invalid shares - {e}")
 
     @classmethod
-    def prepare_stock_data(cls, data: dict, is_new: bool = True):
+    def prepare_stock_data(cls, data: dict, is_new: bool = True, id_when_not_new: str = None):
         """
         Validate and prepare stock data for database insertion or update.
 
@@ -47,7 +70,7 @@ class Stock:
         :return: Prepared stock data dictionary
         """
         # Validate the data first
-        cls.validate_stock_fields(data, is_new)
+        cls.validate_stock_fields(data, is_new, id_when_not_new)
 
         # Prepare the data for storage
         prepared_data = data.copy()
