@@ -27,7 +27,16 @@ class Stock:
         # if is_new, we need to go through all stocks to check for duplicates
         # if not is_new, we need to make sure the id is the same as the one we're updating
         if is_new:
-            if mongo_service.get_stock_by_symbol(COLLECTION_NAME, data["symbol"]):
+            found = False
+            
+            try:
+                if mongo_service.get_stock_by_symbol(COLLECTION_NAME, data["symbol"]):
+                    found = True
+            except ValueError:
+                # The stock symbol does not exist, so we can move on without raising an error
+                pass
+            
+            if found:
                 raise ValueError("Stock with symbol already exists")
         else:
             stock = mongo_service.get_stock(COLLECTION_NAME, id_when_not_new)
@@ -36,7 +45,15 @@ class Stock:
                 raise ValueError("Cannot change stock ID")
             # if we reach this point, the stock ID is the same
             if stock["symbol"] != data["symbol"]:
-                if mongo_service.get_stock_by_symbol(COLLECTION_NAME, data["symbol"]):
+                found = False
+                try:
+                    if mongo_service.get_stock_by_symbol(COLLECTION_NAME, data["symbol"]):
+                        found = True
+                except ValueError:
+                    # The new stock symbol does not exist, so we can update without raising an error
+                    pass
+                
+                if found:
                     raise ValueError("Stock with symbol already exists")
 
         # Validate purchase price
