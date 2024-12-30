@@ -1,4 +1,6 @@
 import os
+
+from flask import abort
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from typing import Dict, List, Any, Optional
@@ -21,9 +23,10 @@ def get_stocks(collection: str, query_params: Dict[str, Any] = None) -> List[Dic
         List of stock dictionaries
     """
     try:
-        stocks = list(db[collection].find(query_params or {}))
+        stocks: List[Dict[str, Any]] = list(db[collection].find(query_params or {}))
         for stock in stocks:
-            stock["_id"] = str(stock["_id"])  # Convert ObjectId to string
+            # copy stock id to a key "id" and convert ObjectId to string
+            stock["id"] = str(stock.pop("_id"))
         return stocks
     except Exception as e:
         raise RuntimeError(f"Error retrieving stocks: {str(e)}")
@@ -62,13 +65,12 @@ def get_stock(collection: str, stock_id: str) -> Optional[Dict[str, Any]]:
         Stock document as a dictionary
     """
     try:
-        stock = db[collection].find_one({"_id": ObjectId(stock_id)})
+        stock: Dict[str, Any] = db[collection].find_one({"_id": ObjectId(stock_id)})
     except Exception as e:
         raise RuntimeError(f"Error retrieving stock: {str(e)}")
-    
     if not stock:
         raise ValueError("Stock not found")
-    stock["_id"] = str(stock["_id"])
+    stock["id"] = str(stock.pop("_id"))
     return stock
 
 
@@ -84,13 +86,13 @@ def get_stock_by_symbol(collection: str, symbol: str) -> Optional[Dict[str, Any]
         Stock document as a dictionary or None if not found
     """
     try:
-        stock = db[collection].find_one({"symbol": symbol})
+        stock: Dict[str, Any] = db[collection].find_one({"symbol": symbol})
     except Exception as e:
         raise RuntimeError(f"Error retrieving stock: {str(e)}")
     
     if not stock:
         raise ValueError("Stock not found")
-    stock["_id"] = str(stock["_id"])
+    stock["id"] = str(stock.pop("_id"))
     return stock
 
 
@@ -133,28 +135,3 @@ def delete_stock(collection: str, stock_id: str) -> bool:
         return result.deleted_count > 0
     except Exception as e:
         raise RuntimeError(f"Error deleting stock: {str(e)}")
-
-
-# def get_db_structure() -> Dict[str, Any]:
-#     """
-#     Retrieve the entire database structure.
-
-#     Returns:
-#         Dictionary representing database and collection structure
-#     """
-#     try:
-#         structure = {}
-#         databases = client.list_database_names()
-#         for database_name in databases:
-#             database = client[database_name]
-#             collections = database.list_collection_names()
-#             structure[database_name] = {}
-#             for collection_name in collections:
-#                 collection = database[collection_name]
-#                 structure[database_name][collection_name] = list(
-#                     collection.find())
-#                 for doc in structure[database_name][collection_name]:
-#                     doc["_id"] = str(doc["_id"])  # Convert ObjectId to string
-#         return structure
-#     except Exception as e:
-#         raise RuntimeError(f"Error retrieving database structure: {str(e)}")

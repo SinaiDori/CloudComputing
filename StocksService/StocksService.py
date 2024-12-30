@@ -29,7 +29,7 @@ def manage_stocks():
             inserted_id = mongo_service.create_stock(
                 COLLECTION_NAME, prepared_stock_data)
 
-            return jsonify({"status": "success", "id": inserted_id}), 201
+            return jsonify({"id": inserted_id}), 201
         except ValueError as e:
             abort(400)
         except Exception as e:
@@ -65,7 +65,7 @@ def manage_stock(stock_id):
         try:
             # Validate and prepare the updated stock data
             prepared_stock_data = Stock.prepare_stock_data(
-                data, is_new=False, id_when_not_new=stock_id)
+                data, is_new=False, id_from_resource_when_not_new=stock_id)
 
             # Update stock in MongoDB
             success = mongo_service.update_stock(
@@ -73,7 +73,7 @@ def manage_stock(stock_id):
             if not success:
                 abort(404)
 
-            return jsonify({"status": "success"}), 200
+            return jsonify({"id": stock_id}), 200
         except ValueError as e:
             abort(400)
         except Exception as e:
@@ -137,8 +137,6 @@ def get_portfolio_value():
 def kill_service():
     """Simulate a crash for testing container restart."""
     os._exit(1)
-
-# Error handlers remain the same as in the original file
 
 
 @app.errorhandler(400)

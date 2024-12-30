@@ -12,7 +12,6 @@ services:
     ports:
       - "5001:8000"
     expose:
-      # expose this container to other containers
       - "8000"
     depends_on:
       - mongodb
@@ -28,7 +27,6 @@ services:
     ports:
       - "5004:8000"
     expose:
-      # expose this container to other containers
       - "8000"
     depends_on:
       - mongodb
@@ -44,7 +42,6 @@ services:
     ports:
       - "5002:8000"
     expose:
-      # expose this container to other containers
       - "8000"
     depends_on:
       - mongodb
@@ -66,7 +63,6 @@ services:
     ports:
       - "27017:27017"
     expose:
-      # expose this container to other containers
       - "27017"
     volumes:
       - mongo-data:/data/db

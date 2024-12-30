@@ -27,8 +27,16 @@ def fetch_stocks(query_params: dict = {}) -> dict:
 
     
     if "numsharesgt" in query_params or "numshareslt" in query_params:
-        min_shares = int(query_params.get("numsharesgt", float('-inf')))
-        max_shares = int(query_params.get("numshareslt", float('inf')))
+        if query_params.get("numsharesgt"):
+            min_shares = int(query_params.get("numsharesgt"))
+        else:
+            min_shares = float('-inf')
+
+        if query_params.get("numshareslt"):
+            max_shares = int(query_params.get("numshareslt"))
+        else:
+            max_shares = float('inf')
+
         stocks = {
             stock_id: stock_data
             for stock_id, stock_data in stocks.items()
@@ -54,7 +62,7 @@ def capital_gains():
         except StocksRealValueError as e:
             abort(500, description="API response code " + e)
     
-    return jsonify({"total capital gains": total_capital_gains}), 200
+    return str(total_capital_gains), 200
 
 
 @app.errorhandler(500)
