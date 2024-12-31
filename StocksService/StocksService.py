@@ -2,7 +2,7 @@ import os
 from flask import Flask, request, jsonify, abort
 from Entities.Stock import Stock  # Importing the Stock class
 from Entities.StocksRealValue import fetch_stock_real_price
-from Core.exceptions import StocksRealValueError
+from Core.exceptions import StocksRealValueError, NotFoundError, AlreadyExistsError, MalformedDataError
 
 # Import the new MongoDB module functions
 import MongoDBService.MongoDBService as mongo_service
@@ -23,24 +23,41 @@ def manage_stocks():
 
         try:
             # Validate and prepare the stock data
-            prepared_stock_data = Stock.prepare_stock_data(data)
+            prepared_stock_data = Stock.prepare_and_validate_stock_data(data)
 
             # Create stock in MongoDB
             inserted_id = mongo_service.create_stock(
                 COLLECTION_NAME, prepared_stock_data)
 
             return jsonify({"id": inserted_id}), 201
+        
+        except MalformedDataError as e:
+            abort(400)
+        except AlreadyExistsError as e:
+            abort(400)
+        except NotFoundError as e:
+            abort(404)
         except ValueError as e:
             abort(400)
         except Exception as e:
             abort(500, description=f"Error creating stock: {e}")
 
     elif request.method == 'GET':
+        query_params = request.args.to_dict() if request.args else None
         try:
+            if query_params: # "fix" query parameters if they are present
+                if "purchase price" in query_params:
+                    query_params["purchase price"] = round(
+                        float(query_params["purchase price"]), 2)
+                if "shares" in query_params:
+                    query_params["shares"] = int(query_params["shares"])
+
             # Get stocks from MongoDB with optional query parameters
             stocks = mongo_service.get_stocks(
-                COLLECTION_NAME, request.args.to_dict())
+                COLLECTION_NAME, query_params)
             return jsonify(stocks), 200
+        except ValueError as e:
+            abort(400)
         except Exception as e:
             abort(500, description=f"Error retrieving stocks: {e}")
 
@@ -52,7 +69,7 @@ def manage_stock(stock_id):
             # Retrieve specific stock
             stock = mongo_service.get_stock(COLLECTION_NAME, stock_id)
             return jsonify(stock), 200
-        except ValueError:
+        except NotFoundError as e:
             abort(404)
         except Exception as e:
             abort(500, description=f"Error retrieving stock: {e}")
@@ -64,7 +81,7 @@ def manage_stock(stock_id):
         data = request.json
         try:
             # Validate and prepare the updated stock data
-            prepared_stock_data = Stock.prepare_stock_data(
+            prepared_stock_data = Stock.prepare_and_validate_stock_data(
                 data, is_new=False, id_from_resource_when_not_new=stock_id)
 
             # Update stock in MongoDB
@@ -74,6 +91,12 @@ def manage_stock(stock_id):
                 abort(404)
 
             return jsonify({"id": stock_id}), 200
+        except NotFoundError as e:
+            abort(404)
+        except MalformedDataError as e:
+            abort(400)
+        except AlreadyExistsError as e:
+            abort(400)
         except ValueError as e:
             abort(400)
         except Exception as e:
@@ -87,6 +110,8 @@ def manage_stock(stock_id):
                 abort(404)
 
             return "", 204
+        except NotFoundError as e:
+            abort(404)
         except Exception as e:
             abort(500, description=f"Error deleting stock: {e}")
 
@@ -106,10 +131,12 @@ def get_stock_value(stock_id):
             "ticker": ticker_price,
             "stock value": stock_value
         }), 200
+    except NotFoundError as e:
+        abort(404)
     except StocksRealValueError as e:
-        abort(500, description=f"API response code {e}")
-    except KeyError as e:
-        abort(500, description=f"Missing field in stock data: {e}")
+        abort(500, description=f"Error fetching stock value: {e}")
+    except Exception as e:
+        abort(500, description=f"Error fetching stock value: {e}")
 
 
 @app.route('/portfolio-value', methods=['GET'])
@@ -129,8 +156,13 @@ def get_portfolio_value():
             "date": request.args.get("date", "Today"),
             "portfolio value": round(total_value, 2)
         }), 200
+
+    except StocksRealValueError as e:
+        abort(500, description=f"Error fetching stock value: {e}")
     except KeyError as e:
         abort(500, description=f"Missing field in stock data: {e}")
+    except Exception as e:
+        abort(500, description=f"Error fetching stock value: {e}")
 
 
 @app.route('/kill', methods=['GET'])

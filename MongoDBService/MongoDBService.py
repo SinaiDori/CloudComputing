@@ -1,6 +1,5 @@
 import os
-
-from flask import abort
+from Core.exceptions import NotFoundError, MalformedDataError
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from typing import Dict, List, Any, Optional
@@ -44,7 +43,7 @@ def create_stock(collection: str, data: Dict[str, Any]) -> str:
         Inserted document's ID as a string
     """
     if not data:
-        raise ValueError("Missing stock data")
+        raise MalformedDataError("Missing stock data")
 
     try:
         result = db[collection].insert_one(data)
@@ -69,7 +68,7 @@ def get_stock(collection: str, stock_id: str) -> Optional[Dict[str, Any]]:
     except Exception as e:
         raise RuntimeError(f"Error retrieving stock: {str(e)}")
     if not stock:
-        raise ValueError("Stock not found")
+        raise NotFoundError("Stock not found")
     stock["id"] = str(stock.pop("_id"))
     return stock
 
@@ -91,7 +90,7 @@ def get_stock_by_symbol(collection: str, symbol: str) -> Optional[Dict[str, Any]
         raise RuntimeError(f"Error retrieving stock: {str(e)}")
     
     if not stock:
-        raise ValueError("Stock not found")
+        raise NotFoundError("Stock not found")
     stock["id"] = str(stock.pop("_id"))
     return stock
 
@@ -109,7 +108,10 @@ def update_stock(collection: str, stock_id: str, data: Dict[str, Any]) -> bool:
         Boolean indicating success of update
     """
     if not data:
-        raise ValueError("Missing update data")
+        raise MalformedDataError("Missing update data")
+
+    # check if stock exists
+    get_stock(collection, stock_id)
 
     try:
         result = db[collection].update_one(
@@ -130,6 +132,10 @@ def delete_stock(collection: str, stock_id: str) -> bool:
     Returns:
         Boolean indicating success of deletion
     """
+
+    # check if stock exists
+    get_stock(collection, stock_id)
+
     try:
         result = db[collection].delete_one({"_id": ObjectId(stock_id)})
         return result.deleted_count > 0
