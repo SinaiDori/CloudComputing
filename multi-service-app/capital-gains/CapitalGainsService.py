@@ -1,7 +1,7 @@
-from Entities.StocksRealValue import fetch_stock_real_price
+from entities.StocksRealValue import fetch_stock_real_price
 from flask import Flask, jsonify, abort, request
 import requests
-from Core.exceptions import StocksRealValueError
+from core.exceptions import StocksRealValueError
 
 app = Flask(__name__)
 

@@ -1,5 +1,5 @@
-from Core.exceptions import NotFoundError, AlreadyExistsError, MalformedDataError
-import MongoDBService.MongoDBService as mongo_service
+from core.exceptions import NotFoundError, AlreadyExistsError, MalformedDataError
+import mongo.MongoDBService as mongo_service
 import os
 
 # Collection name from the environment variable

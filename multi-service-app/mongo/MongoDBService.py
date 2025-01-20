@@ -1,5 +1,5 @@
 import os
-from Core.exceptions import NotFoundError, MalformedDataError
+from core.exceptions import NotFoundError, MalformedDataError
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from typing import Dict, List, Any, Optional

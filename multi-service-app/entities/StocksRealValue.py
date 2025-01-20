@@ -1,5 +1,5 @@
 import requests
-from Core.exceptions import StocksRealValueError
+from core.exceptions import StocksRealValueError
 
 API_KEY = "MybMJ/yhrKNKH7YJVCSfZg==pW9iG0vqEIjkRpnn"
 API_URL = "https://api.api-ninjas.com/v1/stockprice"

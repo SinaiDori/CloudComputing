@@ -5,7 +5,7 @@ services:
   stocks1-aleph:
     build:
       context: .
-      dockerfile: ./StocksService/Dockerfile
+      dockerfile: ./stocks/Dockerfile
     environment:
       <<: *mongo-uri
       COLLECTION_NAME: "stocks1"
@@ -20,7 +20,7 @@ services:
   stocks1-bet:
     build:
       context: .
-      dockerfile: ./StocksService/Dockerfile
+      dockerfile: ./stocks/Dockerfile
     environment:
       <<: *mongo-uri
       COLLECTION_NAME: "stocks1"
@@ -35,7 +35,7 @@ services:
   stocks2:
     build:
       context: .
-      dockerfile: ./StocksService/Dockerfile
+      dockerfile: ./stocks/Dockerfile
     environment:
       <<: *mongo-uri
       COLLECTION_NAME: "stocks2"
@@ -50,7 +50,7 @@ services:
   capital-gains:
     build:
       context: .
-      dockerfile: ./CapitalGainsService/Dockerfile
+      dockerfile: ./capital-gains/Dockerfile
     ports:
       - "5003:8080"
     depends_on:
@@ -69,7 +69,7 @@ services:
     restart: always
 
   nginx:
-    build: ./NGINX
+    build: ./nginx
     depends_on:
       - stocks1-aleph
       - stocks1-bet

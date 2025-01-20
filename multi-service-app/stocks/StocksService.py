@@ -1,11 +1,9 @@
 import os
 from flask import Flask, request, jsonify, abort
-from Entities.Stock import Stock  # Importing the Stock class
-from Entities.StocksRealValue import fetch_stock_real_price
-from Core.exceptions import StocksRealValueError, NotFoundError, AlreadyExistsError, MalformedDataError
-
-# Import the new MongoDB module functions
-import MongoDBService.MongoDBService as mongo_service
+from entities.Stock import Stock  # Importing the Stock class
+from entities.StocksRealValue import fetch_stock_real_price
+from core.exceptions import StocksRealValueError, NotFoundError, AlreadyExistsError, MalformedDataError
+import mongo.MongoDBService as mongo_service
 
 app = Flask(__name__)
 
