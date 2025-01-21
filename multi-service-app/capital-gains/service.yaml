@@ -9,6 +9,6 @@ spec:
     app: capital-gains
   ports:
   - protocol: TCP
-    port: 80
+    port: 8000
     targetPort: 8080
   type: ClusterIP

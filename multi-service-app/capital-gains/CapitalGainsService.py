@@ -5,27 +5,59 @@ from core.exceptions import StocksRealValueError
 
 app = Flask(__name__)
 
+# def fetch_stocks(query_params: dict = {}) -> dict:
+#     services = {
+#         "stocks1": "http://stocks1-aleph:8000/stocks",
+#         "stocks2": "http://stocks2:8000/stocks"
+#     }
+
+#     stocks = {}
+
+#     portfolios = query_params.get("portfolio")
+#     portfolios = [portfolios] if portfolios else ["stocks1", "stocks2"]
+
+#     for portfolio in portfolios:
+#         try:
+#             response = requests.get(services[portfolio])
+#             if response.status_code == 200:
+#                 for stock in response.json():
+#                     stocks[stock["symbol"]] = stock
+#         except Exception as e:
+#             print(f"Failed to fetch stocks from {services[0]}: {e}")
+
+
+#     if "numsharesgt" in query_params or "numshareslt" in query_params:
+#         if query_params.get("numsharesgt"):
+#             min_shares = int(query_params.get("numsharesgt"))
+#         else:
+#             min_shares = float('-inf')
+
+#         if query_params.get("numshareslt"):
+#             max_shares = int(query_params.get("numshareslt"))
+#         else:
+#             max_shares = float('inf')
+
+#         stocks = {
+#             stock_id: stock_data
+#             for stock_id, stock_data in stocks.items()
+#             if min_shares < stock_data["shares"] < max_shares
+#         }
+
+#     return stocks
+
 def fetch_stocks(query_params: dict = {}) -> dict:
-    services = {
-        "stocks1": "http://stocks1-aleph:8000/stocks",
-        "stocks2": "http://stocks2:8000/stocks"
-    }
+    service = "http://stocks-service:8000/stocks"
 
     stocks = {}
 
-    portfolios = query_params.get("portfolio")
-    portfolios = [portfolios] if portfolios else ["stocks1", "stocks2"]
+    try:
+        response = requests.get(service)
+        if response.status_code == 200:
+            for stock in response.json():
+                stocks[stock["symbol"]] = stock
+    except Exception as e:
+        print(f"Failed to fetch stocks from {services[0]}: {e}")
 
-    for portfolio in portfolios:
-        try:
-            response = requests.get(services[portfolio])
-            if response.status_code == 200:
-                for stock in response.json():
-                    stocks[stock["symbol"]] = stock
-        except Exception as e:
-            print(f"Failed to fetch stocks from {services[0]}: {e}")
-
-    
     if "numsharesgt" in query_params or "numshareslt" in query_params:
         if query_params.get("numsharesgt"):
             min_shares = int(query_params.get("numsharesgt"))
@@ -42,13 +74,13 @@ def fetch_stocks(query_params: dict = {}) -> dict:
             for stock_id, stock_data in stocks.items()
             if min_shares < stock_data["shares"] < max_shares
         }
-    
+
     return stocks
 
 
 @app.route('/capital-gains', methods=['GET'])
 def capital_gains():
-    
+
     total_capital_gains = 0
     query_params = request.args.to_dict()
     stocks = fetch_stocks(query_params)
@@ -61,7 +93,7 @@ def capital_gains():
             total_capital_gains += capital_gain
         except StocksRealValueError as e:
             abort(500, description="API response code " + e)
-    
+
     return str(total_capital_gains), 200
 
 
@@ -69,6 +101,7 @@ def capital_gains():
 def internal_server_error(error):
     description = error.description if error.description else "Internal server error"
     return jsonify({"server error": description}), 500
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
