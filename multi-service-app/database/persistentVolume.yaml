@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: stock-db-pv
+  labels:
+    app: stock-service-db
+spec:
+  capacity:
+    storage: 1Gi 
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  hostPath:
+    path: /mnt/data/stock-db  # Path on the Node's filesystem to store data
