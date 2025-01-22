@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: stock-db
+  namespace: stocks-app
   labels:
     app: stock-service-db
 spec:

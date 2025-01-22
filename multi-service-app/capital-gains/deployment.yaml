@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: capital-gains-deployment
+  namespace: stocks-app
   labels:
     app: capital-gains
 spec:

@@ -2,6 +2,7 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: stock-db-pv
+  namespace: stocks-app
   labels:
     app: stock-service-db
 spec:
