@@ -18,5 +18,6 @@ spec:
       containers:
       - name: stock-service
         image: stock-service:latest  
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000  # Port the app listens on

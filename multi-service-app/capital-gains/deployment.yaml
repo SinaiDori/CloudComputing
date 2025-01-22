@@ -17,6 +17,7 @@ spec:
     spec:
       containers:
       - name: capital-gains
-        image: capital-gains-image
+        image: capital-gains:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080

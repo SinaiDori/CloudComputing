@@ -46,7 +46,7 @@ app = Flask(__name__)
 #     return stocks
 
 def fetch_stocks(query_params: dict = {}) -> dict:
-    service = "http://stocks-service:8000/stocks"
+    service = "http://stock-service:8000/stocks"
 
     stocks = {}
 
