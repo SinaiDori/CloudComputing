@@ -7,9 +7,6 @@ import mongo.MongoDBService as mongo_service
 
 app = Flask(__name__)
 
-# Collection name from the environment variable
-COLLECTION_NAME = os.getenv("COLLECTION_NAME", "stocks1")
-
 
 @app.route('/stocks', methods=['POST', 'GET'])
 def manage_stocks():
@@ -24,11 +21,10 @@ def manage_stocks():
             prepared_stock_data = Stock.prepare_and_validate_stock_data(data)
 
             # Create stock in MongoDB
-            inserted_id = mongo_service.create_stock(
-                COLLECTION_NAME, prepared_stock_data)
+            inserted_id = mongo_service.create_stock(prepared_stock_data)
 
             return jsonify({"id": inserted_id}), 201
-        
+
         except MalformedDataError as e:
             abort(400)
         except AlreadyExistsError as e:
@@ -43,16 +39,14 @@ def manage_stocks():
     elif request.method == 'GET':
         query_params = request.args.to_dict() if request.args else None
         try:
-            if query_params: # "fix" query parameters if they are present
+            if query_params:  # "Fix" query parameters if they are present
                 if "purchase price" in query_params:
-                    query_params["purchase price"] = round(
-                        float(query_params["purchase price"]), 2)
+                    query_params["purchase price"] = round(float(query_params["purchase price"]), 2)
                 if "shares" in query_params:
                     query_params["shares"] = int(query_params["shares"])
 
             # Get stocks from MongoDB with optional query parameters
-            stocks = mongo_service.get_stocks(
-                COLLECTION_NAME, query_params)
+            stocks = mongo_service.get_stocks(query_params)
             return jsonify(stocks), 200
         except ValueError as e:
             abort(400)
@@ -65,7 +59,7 @@ def manage_stock(stock_id):
     if request.method == 'GET':
         try:
             # Retrieve specific stock
-            stock = mongo_service.get_stock(COLLECTION_NAME, stock_id)
+            stock = mongo_service.get_stock(stock_id)
             return jsonify(stock), 200
         except NotFoundError as e:
             abort(404)
@@ -83,8 +77,7 @@ def manage_stock(stock_id):
                 data, is_new=False, id_from_resource_when_not_new=stock_id)
 
             # Update stock in MongoDB
-            success = mongo_service.update_stock(
-                COLLECTION_NAME, stock_id, prepared_stock_data)
+            success = mongo_service.update_stock(stock_id, prepared_stock_data)
             if not success:
                 abort(404)
 
@@ -103,7 +96,7 @@ def manage_stock(stock_id):
     elif request.method == 'DELETE':
         try:
             # Delete stock from MongoDB
-            success = mongo_service.delete_stock(COLLECTION_NAME, stock_id)
+            success = mongo_service.delete_stock(stock_id)
             if not success:
                 abort(404)
 
@@ -118,7 +111,7 @@ def manage_stock(stock_id):
 def get_stock_value(stock_id):
     try:
         # Fetch stock from MongoDB
-        stock = mongo_service.get_stock(COLLECTION_NAME, stock_id)
+        stock = mongo_service.get_stock(stock_id)
 
         # Fetch real-time stock price
         ticker_price = fetch_stock_real_price(stock["symbol"])
@@ -141,8 +134,7 @@ def get_stock_value(stock_id):
 def get_portfolio_value():
     try:
         # Fetch all stocks from MongoDB
-        stocks = mongo_service.get_stocks(
-            COLLECTION_NAME, request.args.to_dict())
+        stocks = mongo_service.get_stocks(request.args.to_dict())
 
         # Calculate total portfolio value
         total_value = 0
