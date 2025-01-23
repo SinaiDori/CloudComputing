@@ -1,3 +1,4 @@
+import datetime
 import os
 from flask import Flask, request, jsonify, abort
 from entities.Stock import Stock  # Importing the Stock class
@@ -143,9 +144,9 @@ def get_portfolio_value():
             total_value += ticker_price * stock["shares"]
 
         return jsonify({
-            "date": request.args.get("date", "Today"),
-            "portfolio value": round(total_value, 2)
-        }), 200
+                    "date": datetime.datetime.now().strftime("%d-%m-%Y"),
+                    "portfolio value": round(total_value, 2)
+                }), 200
 
     except StocksRealValueError as e:
         abort(500, description=f"Error fetching stock value: {e}")

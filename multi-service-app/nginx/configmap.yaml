@@ -1,53 +1,10 @@
-# apiVersion: v1
-# kind: ConfigMap
-# metadata:
-#   name: nginx-config
-#   namespace: stocks-app
-# data:
-#   nginx.conf: |
-#     events {
-#         worker_connections 1024;
-#     }
-
-#     http {
-#         include /etc/nginx/mime.types;
-#         default_type application/octet-stream;
-
-#         upstream stock-backend {
-#             server stock-service:8000;
-#         }
-
-#         upstream capital-gains-backend {
-#             server capital-gains-service:8000;
-#         }
-
-#         server {
-#             listen 80;
-#             server_name localhost;
-
-#             location /stocks {
-#                 proxy_pass http://stock-backend;
-#                 proxy_set_header Host $host;
-#                 proxy_set_header X-Real-IP $remote_addr;
-#                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-#                 proxy_set_header X-Forwarded-Proto $scheme;
-#             }
-
-#             location /capital-gains {
-#                 proxy_pass http://capital-gains-backend;
-#                 proxy_set_header Host $host;
-#                 proxy_set_header X-Real-IP $remote_addr;
-#                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-#                 proxy_set_header X-Forwarded-Proto $scheme;
-#             }
-#         }
-#     }
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nginx-config
+  name: nginx-configmap
   namespace: stocks-app
+  labels:
+    app: nginx
 data:
   nginx.conf: |
     events {
@@ -58,12 +15,10 @@ data:
         include /etc/nginx/mime.types;
         default_type application/octet-stream;
 
-        # Upstream for the stocks microservice
         upstream stocks-backend {
             server stock-service:8000;
         }
 
-        # Upstream for the capital-gains microservice
         upstream capital-gains-backend {
             server capital-gains-service:8000;
         }
@@ -73,6 +28,30 @@ data:
             server_name localhost;
 
             location /stocks {
+                proxy_pass http://stocks-backend;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+
+            location /stock-value {
+                proxy_pass http://stocks-backend;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+
+            location /portfolio-value {
+                proxy_pass http://stocks-backend;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+
+            location /kill {
                 proxy_pass http://stocks-backend;
                 proxy_set_header Host $host;
                 proxy_set_header X-Real-IP $remote_addr;

@@ -2,10 +2,6 @@ from core.exceptions import NotFoundError, AlreadyExistsError, MalformedDataErro
 import mongo.MongoDBService as mongo_service
 import os
 
-# Collection name from the environment variable
-COLLECTION_NAME = os.getenv("COLLECTION_NAME", "stocks1")
-
-
 class Stock:
     @classmethod
     def validate_stock_fields(cls, data: dict, is_new: bool = True, id_from_resource_when_not_new: str = None):
@@ -31,7 +27,7 @@ class Stock:
             found = False
             
             try:
-                if mongo_service.get_stock_by_symbol(COLLECTION_NAME, data["symbol"]):
+                if mongo_service.get_stock_by_symbol(data["symbol"]):
                     found = True
             except NotFoundError:
                 # The stock symbol does not exist, so we can move on without raising an error
@@ -40,7 +36,7 @@ class Stock:
             if found:
                 raise AlreadyExistsError("Stock with symbol already exists")
         else: # PUT request
-            stock = mongo_service.get_stock(COLLECTION_NAME, id_from_resource_when_not_new)
+            stock = mongo_service.get_stock(id_from_resource_when_not_new)
             # if we reach this point, the stock exists
             if id_from_resource_when_not_new != data["id"]:
                 raise MalformedDataError("Cannot change stock ID")
@@ -48,7 +44,7 @@ class Stock:
             if stock["symbol"] != data["symbol"]:
                 found = False
                 try:
-                    if mongo_service.get_stock_by_symbol(COLLECTION_NAME, data["symbol"]):
+                    if mongo_service.get_stock_by_symbol(data["symbol"]):
                         found = True
                 except NotFoundError:
                     # The new stock symbol does not exist, so we can update without raising an error

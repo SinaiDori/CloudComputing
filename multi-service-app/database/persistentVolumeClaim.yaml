@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: stock-db-pvc
+  name: mongodb-pvc
   namespace: stocks-app
   labels:
-    app: stock-service-db
+    app: mongodb
 spec:
   accessModes:
     - ReadWriteOnce

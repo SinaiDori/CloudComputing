@@ -5,7 +5,7 @@ from bson.objectid import ObjectId
 from typing import Dict, List, Any, Optional
 
 # MongoDB Setup
-MONGO_URI = "mongodb://mongodb:27017"
+MONGO_URI = "mongodb://mongodb-service:27017"
 COLLECTION_NAME = "stocks"
 
 client = MongoClient(MONGO_URI)

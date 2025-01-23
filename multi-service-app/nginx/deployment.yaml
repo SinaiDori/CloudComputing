@@ -1,17 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-reverse-proxy
+  name: nginx-deployment
   namespace: stocks-app
+  labels:
+    app: nginx
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: nginx-reverse-proxy
+      app: nginx
   template:
     metadata:
       labels:
-        app: nginx-reverse-proxy
+        app: nginx
     spec:
       containers:
       - name: nginx
@@ -25,4 +27,4 @@ spec:
       volumes:
       - name: nginx-config-volume
         configMap:
-          name: nginx-config
+          name: nginx-configmap

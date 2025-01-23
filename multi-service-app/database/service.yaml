@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: mongo-service
+  name: mongodb-service
   namespace: stocks-app
   labels:
-    app: mongo
+    app: mongodb
 spec:
   type: ClusterIP  # Default, for internal communication only
   ports:
-    - port: 27017  # MongoDB default port
-      targetPort: 27017
+    - port: 27017
+      targetPort: 27017 # MongoDB default port
   selector:
-    app: mongo
+    app: mongodb
