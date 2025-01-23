@@ -5,46 +5,6 @@ from core.exceptions import StocksRealValueError
 
 app = Flask(__name__)
 
-# def fetch_stocks(query_params: dict = {}) -> dict:
-#     services = {
-#         "stocks1": "http://stocks1-aleph:8000/stocks",
-#         "stocks2": "http://stocks2:8000/stocks"
-#     }
-
-#     stocks = {}
-
-#     portfolios = query_params.get("portfolio")
-#     portfolios = [portfolios] if portfolios else ["stocks1", "stocks2"]
-
-#     for portfolio in portfolios:
-#         try:
-#             response = requests.get(services[portfolio])
-#             if response.status_code == 200:
-#                 for stock in response.json():
-#                     stocks[stock["symbol"]] = stock
-#         except Exception as e:
-#             print(f"Failed to fetch stocks from {services[0]}: {e}")
-
-
-#     if "numsharesgt" in query_params or "numshareslt" in query_params:
-#         if query_params.get("numsharesgt"):
-#             min_shares = int(query_params.get("numsharesgt"))
-#         else:
-#             min_shares = float('-inf')
-
-#         if query_params.get("numshareslt"):
-#             max_shares = int(query_params.get("numshareslt"))
-#         else:
-#             max_shares = float('inf')
-
-#         stocks = {
-#             stock_id: stock_data
-#             for stock_id, stock_data in stocks.items()
-#             if min_shares < stock_data["shares"] < max_shares
-#         }
-
-#     return stocks
-
 def fetch_stocks(query_params: dict = {}) -> dict:
     service = "http://stock-service:8000/stocks"
 
@@ -56,7 +16,7 @@ def fetch_stocks(query_params: dict = {}) -> dict:
             for stock in response.json():
                 stocks[stock["symbol"]] = stock
     except Exception as e:
-        print(f"Failed to fetch stocks from {services[0]}: {e}")
+        print(f"Failed to fetch stocks from {service}: {e}")
 
     if "numsharesgt" in query_params or "numshareslt" in query_params:
         if query_params.get("numsharesgt"):
@@ -88,8 +48,7 @@ def capital_gains():
     for stock in stocks.values():
         try:
             current_price = fetch_stock_real_price(stock["symbol"])
-            current_value = stock["shares"] * current_price
-            capital_gain = current_value - stock["purchase price"]
+            capital_gain = (current_price - stock["purchase_price"]) * stock["shares"]
             total_capital_gains += capital_gain
         except StocksRealValueError as e:
             abort(500, description="API response code " + e)
