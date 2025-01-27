@@ -106,13 +106,14 @@ def update_stock(stock_id: str, data: Dict[str, Any]) -> bool:
     if not data:
         raise MalformedDataError("Missing update data")
 
-    # Check if stock exists
-    get_stock(stock_id)
-
     try:
         result = db[COLLECTION_NAME].update_one(
             {"_id": ObjectId(stock_id)}, {"$set": data})
-        return result.matched_count > 0
+        if result.matched_count == 0:
+            raise NotFoundError("Stock not found")
+        return True
+    except NotFoundError:
+        raise
     except Exception as e:
         raise RuntimeError(f"Error updating stock: {str(e)}")
 
@@ -127,11 +128,12 @@ def delete_stock(stock_id: str) -> bool:
     Returns:
         Boolean indicating success of deletion
     """
-    # Check if stock exists
-    get_stock(stock_id)
-
     try:
         result = db[COLLECTION_NAME].delete_one({"_id": ObjectId(stock_id)})
-        return result.deleted_count > 0
+        if result.deleted_count == 0:
+            raise NotFoundError("Stock not found")
+        return True
+    except NotFoundError:
+        raise
     except Exception as e:
         raise RuntimeError(f"Error deleting stock: {str(e)}")
