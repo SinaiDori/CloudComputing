@@ -1,6 +1,7 @@
 import os
-from core.exceptions import NotFoundError, MalformedDataError
+from core.exceptions import NotFoundError, MalformedDataError, AlreadyExistsError
 from pymongo import MongoClient
+from pymongo.errors import DuplicateKeyError
 from bson.objectid import ObjectId
 from typing import Dict, List, Any, Optional
 
@@ -10,6 +11,7 @@ COLLECTION_NAME = "stocks"
 
 client = MongoClient(MONGO_URI)
 db = client[COLLECTION_NAME]
+db[COLLECTION_NAME].create_index("symbol", unique=True)
 
 
 def get_stocks(query_params: Dict[str, Any] = None) -> List[Dict[str, Any]]:
@@ -47,6 +49,8 @@ def create_stock(data: Dict[str, Any]) -> str:
     try:
         result = db[COLLECTION_NAME].insert_one(data)
         return str(result.inserted_id)
+    except DuplicateKeyError:
+        raise AlreadyExistsError("Stock with symbol already exists")
     except Exception as e:
         raise RuntimeError(f"Error creating stock: {str(e)}")
 
@@ -112,6 +116,8 @@ def update_stock(stock_id: str, data: Dict[str, Any]) -> bool:
         if result.matched_count == 0:
             raise NotFoundError("Stock not found")
         return True
+    except DuplicateKeyError:
+        raise AlreadyExistsError("Stock with symbol already exists")
     except NotFoundError:
         raise
     except Exception as e:
