@@ -48,7 +48,7 @@ def capital_gains():
     for stock in stocks.values():
         try:
             current_price = fetch_stock_real_price(stock["symbol"])
-            capital_gain = (current_price - stock["purchase_price"]) * stock["shares"]
+            capital_gain = (current_price - stock["purchase price"]) * stock["shares"]
             total_capital_gains += capital_gain
         except StocksRealValueError as e:
             abort(500, description="API response code " + e)
